@@ -63,34 +63,63 @@ int busca_kmp(char *texto, char *padrao){
     return ocorrencias;
 }
 
-int main() {
-    int tam_texto = 100000;
-    int tam_padrao = 1000;
-
-    char *texto = malloc((tam_texto + 1) * sizeof(char));
-    char *padrao = malloc((tam_padrao + 1) * sizeof(char));
-
-    for (int i = 0; i < tam_texto; i++) {
-        texto[i] = 'A';
+char *ler_arquivo(char *caminho) {
+    FILE *arquivo = fopen(caminho, "rb");
+    if (!arquivo) {
+        fprintf(stderr, "Erro ao abrir arquivo: %s\n", caminho);
+        exit(1);
     }
-    texto[tam_texto] = '\0';
 
-    for (int i = 0; i < tam_padrao - 1; i++) {
-        padrao[i] = 'A';
+    fseek(arquivo, 0, SEEK_END);
+    long tamanho = ftell(arquivo);
+    fseek(arquivo, 0, SEEK_SET);
+
+    char *conteudo = (char *)malloc((tamanho + 1) * sizeof(char));
+    size_t lidos = fread(conteudo, 1, tamanho, arquivo);
+    conteudo[lidos] = '\0';
+    fclose(arquivo);
+
+    // Remove quebras de linha (\n ou \r) do final do arquivo, se houver
+    while (lidos > 0 && (conteudo[lidos - 1] == '\n' || conteudo[lidos - 1] == '\r')) {
+        conteudo[--lidos] = '\0';
     }
-    padrao[tam_padrao - 1] = 'B';
-    padrao[tam_padrao] = '\0';
 
-    clock_t t1 = clock();
-    int achados_ing = busca_ingenua(texto, padrao);
-    double tempo_ing = (double)(clock() - t1) / CLOCKS_PER_SEC;
+    return conteudo;
+}
 
-    clock_t t2 = clock();
-    int achados_kmp = busca_kmp(texto, padrao);
-    double tempo_kmp = (double)(clock() - t2) / CLOCKS_PER_SEC;
+int main(int argc, char *argv[]) {
+    // Verifica se foram passados os 3 argumentos: <algoritmo> <arq_texto> <arq_padrao>
+    if (argc != 4) {
+        fprintf(stderr, "Uso: %s <ingenua|kmp> <arquivo_texto> <arquivo_padrao>\n", argv[0]);
+        return 1;
+    }
 
-    printf("ingenua: %d ocorrencias (%.6f s)\n", achados_ing, tempo_ing);
-    printf("kmp: %d ocorrencias (%.6f s)\n", achados_kmp, tempo_kmp);
+    char *algoritmo = argv[1];
+    char *caminho_texto = argv[2];
+    char *caminho_padrao = argv[3];
+
+    // 1. Leitura dos arquivos (FORA do cronômetro)
+    char *texto = ler_arquivo(caminho_texto);
+    char *padrao = ler_arquivo(caminho_padrao);
+
+    int ocorrencias = 0;
+
+    // 2. Medição estrita da execução do algoritmo
+    clock_t inicio = clock();
+    if (strcmp(algoritmo, "ingenua") == 0) {
+        ocorrencias = busca_ingenua(texto, padrao);
+    } else if (strcmp(algoritmo, "kmp") == 0) {
+        ocorrencias = busca_kmp(texto, padrao);
+    } else {
+        fprintf(stderr, "Algoritmo invalido. Use 'ingenua' ou 'kmp'.\n");
+        free(texto);
+        free(padrao);
+        return 1;
+    }
+    double tempo = (double)(clock() - inicio) / CLOCKS_PER_SEC;
+
+    // 3. Impressão padronizada (facilita a captura pelo script de benchmark)
+    printf("%d;%.6f\n", ocorrencias, tempo);
 
     free(texto);
     free(padrao);

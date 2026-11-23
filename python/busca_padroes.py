@@ -1,4 +1,5 @@
 import time
+import sys
 
 def busca_ingenua(texto, padrao):
     tam_texto = len(texto)
@@ -50,17 +51,32 @@ def busca_kmp(texto, padrao):
     return ocorrencias
 
 if __name__ == "__main__":
-    tam_texto, tam_padrao = 100_000, 1_000
-    texto = "A" * tam_texto
-    padrao = "A" * (tam_padrao - 1) + "B"
+    # Verifica se foram passados os 3 argumentos: <algoritmo> <arq_texto> <arq_padrao>
+    if len(sys.argv) != 4:
+        print("Uso: python busca_padroes.py <ingenua|kmp> <arquivo_texto> <arquivo_padrao>", file=sys.stderr)
+        sys.exit(1)
 
-    t1 = time.perf_counter()
-    achados_ing = busca_ingenua(texto, padrao)
-    tempo_ing = time.perf_counter() - t1
+    algoritmo = sys.argv[1]
+    caminho_texto = sys.argv[2]
+    caminho_padrao = sys.argv[3]
 
-    t2 = time.perf_counter()
-    achados_kmp = busca_kmp(texto, padrao)
-    tempo_kmp = time.perf_counter() - t2
+    # 1. Leitura dos arquivos (FORA do cronômetro)
+    with open(caminho_texto, "r", encoding="utf-8") as f:
+        texto = f.read().rstrip("\r\n")
 
-    print(f"ingenua: {achados_ing} ocorrencias ({tempo_ing:.6f} s)")
-    print(f"kmp: {achados_kmp} ocorrencias ({tempo_kmp:.6f} s)")
+    with open(caminho_padrao, "r", encoding="utf-8") as f:
+        padrao = f.read().rstrip("\r\n")
+
+    # 2. Medição estrita da execução do algoritmo
+    inicio = time.perf_counter()
+    if algoritmo == "ingenua":
+        ocorrencias = busca_ingenua(texto, padrao)
+    elif algoritmo == "kmp":
+        ocorrencias = busca_kmp(texto, padrao)
+    else:
+        print("Algoritmo inválido. Use 'ingenua' ou 'kmp'.", file=sys.stderr)
+        sys.exit(1)
+    tempo = time.perf_counter() - inicio
+
+    # 3. Impressão padronizada (idêntica à do programa em C)
+    print(f"{ocorrencias};{tempo:.6f}")
