@@ -31,12 +31,17 @@ Dado um texto $T$ de comprimento $n$ e um padrão $P$ de comprimento $m$ ($m \le
 ```text
 .
 ├── c/
-│   └── busca_padroes.c       # Implementação em C (Busca Ingênua + KMP + Benchmark)
+│   └── busca_padroes.c          # Implementação em C (Busca Ingênua + KMP)
 ├── python/
-│   └── busca_padroes.py      # Implementação em Python (Busca Ingênua + KMP + Benchmark)
-├── relatorio/
-│   └── relatorio.pdf         # Relatório completo com gráficos e tabelas experimentais
-└── README.md                 # Documentação do projeto
+│   └── busca_padroes.py         # Implementação em Python (Busca Ingênua + KMP)
+├── entradas/                    # Textos (T_*) e padrões (P_*) gerados para cada cenário e tamanho
+├── resultados/
+│   ├── benchmark.csv            # Tempos médios e desvios-padrão de todas as execuções
+│   ├── grafico_pior_caso_loglog.png
+│   ├── grafico_cenarios_c.png
+│   └── grafico_razao_teorico_medido.png
+├── executar_experimentos.py     # Gera as entradas, roda os benchmarks, valida a corretude e plota os gráficos
+└── README.md
 ```
 
 ---
@@ -45,36 +50,61 @@ Dado um texto $T$ de comprimento $n$ e um padrão $P$ de comprimento $m$ ($m \le
 
 ### Pré-requisitos
 * **C:** Compilador `gcc` (ou `clang`) instalado.
-* **Python:** Python `3.10` ou superior.
+* **Python:** Python `3.10` ou superior, com `matplotlib` (`pip install matplotlib`) para os gráficos.
 
-### 1. Executando a versão em C
-Compile o código com otimização (`-O2`) e execute o binário gerado:
-
-```bash
-gcc -O2 c/busca_padroes.c -o busca_padroes
-./busca_padroes
-```
-
-*(No Windows, execute `busca_padroes.exe` no terminal.)*
-
-### 2. Executando a versão em Python
-Execute diretamente via interpretador Python:
+### 1. Compilando a versão em C
+Compile o código com otimização (`-O2`), gerando o binário dentro da pasta `c/`:
 
 ```bash
-python python/busca_padroes.py
+gcc -O2 c/busca_padroes.c -o c/busca_padroes
 ```
+
+*(No Windows, o binário gerado será `c/busca_padroes.exe`.)*
+
+### 2. Executando um algoritmo individualmente
+Ambas as implementações recebem o algoritmo (`ingenua` ou `kmp`), o arquivo do texto e o arquivo do padrão, e imprimem `ocorrencias;tempo_em_segundos`:
+
+```bash
+./c/busca_padroes kmp entradas/T_pior_10000.txt entradas/P_pior_10000.txt
+python python/busca_padroes.py kmp entradas/T_pior_10000.txt entradas/P_pior_10000.txt
+```
+
+A leitura dos arquivos fica fora da medição de tempo; apenas a execução do algoritmo é cronometrada.
+
+### 3. Executando todos os experimentos
+Com o binário em C compilado, rode a partir da raiz do repositório:
+
+```bash
+python executar_experimentos.py
+```
+
+O script:
+1. Gera as entradas em `entradas/` para os cenários de **melhor**, **médio** e **pior** caso, com $n \in \{1.000, 2.000, 5.000, 10.000, 20.000, 30.000\}$ e $m = \max(10, n/5)$ (semente fixa `42`);
+2. Executa cada combinação (C/Python × Ingênua/KMP) **15 vezes**, registrando média e desvio-padrão;
+3. Verifica automaticamente que as quatro implementações retornam o mesmo número de ocorrências;
+4. Salva os dados em `resultados/benchmark.csv` e gera os gráficos em `resultados/`.
 
 ---
 
 ## 📈 Resultados Experimentais
 
-| Tamanho ($n$) | Cenário | Ingênua (C) [s] | KMP (C) [s] | Ingênua (Python) [s] | KMP (Python) [s] |
-| :---: | :--- | :---: | :---: | :---: | :---: |
-| $10.000$ | Pior Caso | `-` | `-` | `-` | `-` |
-| $100.000$ | Pior Caso | `-` | `-` | `-` | `-` |
-| $500.000$ | Pior Caso | `-` | `-` | `-` | `-` |
-| $100.000$ | Caso Médio | `-` | `-` | `-` | `-` |
-| $500.000$ | Caso Médio | `-` | `-` | `-` | `-` |
+Tempos médios de 15 execuções no **pior caso** ($T = \text{"A"}^n$, $P = \text{"A"}^{m-1}\text{"B"}$, $m = n/5$):
+
+| Tamanho ($n$) | Ingênua (C) [s] | KMP (C) [s] | Ingênua (Python) [s] | KMP (Python) [s] |
+| :---: | :---: | :---: | :---: | :---: |
+| $1.000$ | `0.000067` | `0.000000` | `0.003933` | `0.000113` |
+| $2.000$ | `0.000000` | `0.000000` | `0.016234` | `0.000250` |
+| $5.000$ | `0.001333` | `0.000000` | `0.107743` | `0.000594` |
+| $10.000$ | `0.002200` | `0.000000` | `0.431583` | `0.001149` |
+| $20.000$ | `0.010067` | `0.000067` | `1.753963` | `0.002299` |
+| $30.000$ | `0.026267` | `0.000000` | `3.919641` | `0.003521` |
+
+* Na Busca Ingênua em Python, dobrar $n$ (e, consequentemente, $m$) multiplica o tempo por aproximadamente $4$, o comportamento quadrático esperado de $O(n \cdot m)$ com $m \propto n$.
+* O KMP cresce de forma linear: em Python, a razão $T(n)/(n+m)$ se mantém aproximadamente constante (ver `grafico_razao_teorico_medido.png`).
+* Nos cenários de melhor caso e caso médio, os dois algoritmos ficam na mesma ordem de grandeza, já que as falhas ocorrem logo nos primeiros caracteres.
+* Os tempos em C próximos de zero refletem a resolução limitada de `clock()` para execuções tão rápidas, não um custo realmente nulo.
+
+Os dados completos (todos os cenários, com desvio-padrão) estão em `resultados/benchmark.csv`, e os gráficos em `resultados/`.
 
 ---
 

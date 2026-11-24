@@ -51,7 +51,6 @@ def busca_kmp(texto, padrao):
     return ocorrencias
 
 if __name__ == "__main__":
-    # Verifica se foram passados os 3 argumentos: <algoritmo> <arq_texto> <arq_padrao>
     if len(sys.argv) != 4:
         print("Uso: python busca_padroes.py <ingenua|kmp> <arquivo_texto> <arquivo_padrao>", file=sys.stderr)
         sys.exit(1)
@@ -60,14 +59,12 @@ if __name__ == "__main__":
     caminho_texto = sys.argv[2]
     caminho_padrao = sys.argv[3]
 
-    # 1. Leitura dos arquivos (FORA do cronômetro)
     with open(caminho_texto, "r", encoding="utf-8") as f:
         texto = f.read().rstrip("\r\n")
 
     with open(caminho_padrao, "r", encoding="utf-8") as f:
         padrao = f.read().rstrip("\r\n")
 
-    # 2. Medição estrita da execução do algoritmo
     inicio = time.perf_counter()
     if algoritmo == "ingenua":
         ocorrencias = busca_ingenua(texto, padrao)
@@ -78,5 +75,4 @@ if __name__ == "__main__":
         sys.exit(1)
     tempo = time.perf_counter() - inicio
 
-    # 3. Impressão padronizada (idêntica à do programa em C)
     print(f"{ocorrencias};{tempo:.6f}")

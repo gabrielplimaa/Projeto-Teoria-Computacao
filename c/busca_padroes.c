@@ -79,7 +79,6 @@ char *ler_arquivo(char *caminho) {
     conteudo[lidos] = '\0';
     fclose(arquivo);
 
-    // Remove quebras de linha (\n ou \r) do final do arquivo, se houver
     while (lidos > 0 && (conteudo[lidos - 1] == '\n' || conteudo[lidos - 1] == '\r')) {
         conteudo[--lidos] = '\0';
     }
@@ -88,7 +87,6 @@ char *ler_arquivo(char *caminho) {
 }
 
 int main(int argc, char *argv[]) {
-    // Verifica se foram passados os 3 argumentos: <algoritmo> <arq_texto> <arq_padrao>
     if (argc != 4) {
         fprintf(stderr, "Uso: %s <ingenua|kmp> <arquivo_texto> <arquivo_padrao>\n", argv[0]);
         return 1;
@@ -98,13 +96,11 @@ int main(int argc, char *argv[]) {
     char *caminho_texto = argv[2];
     char *caminho_padrao = argv[3];
 
-    // 1. Leitura dos arquivos (FORA do cronômetro)
     char *texto = ler_arquivo(caminho_texto);
     char *padrao = ler_arquivo(caminho_padrao);
 
     int ocorrencias = 0;
 
-    // 2. Medição estrita da execução do algoritmo
     clock_t inicio = clock();
     if (strcmp(algoritmo, "ingenua") == 0) {
         ocorrencias = busca_ingenua(texto, padrao);
@@ -118,7 +114,6 @@ int main(int argc, char *argv[]) {
     }
     double tempo = (double)(clock() - inicio) / CLOCKS_PER_SEC;
 
-    // 3. Impressão padronizada (facilita a captura pelo script de benchmark)
     printf("%d;%.6f\n", ocorrencias, tempo);
 
     free(texto);
