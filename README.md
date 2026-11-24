@@ -91,4 +91,4 @@ python python/busca_padroes.py
 
 * **Gabriel Pereira Lima**
 * **Guilherme Tolentino Leitão de Melo**
-* **João Eduardo Andrade Azevedo** 
+* **João Eduardo Andrade de Azevedo** 
