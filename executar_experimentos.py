@@ -5,6 +5,7 @@ import statistics
 import subprocess
 import matplotlib.pyplot as plt
 
+# 6 tamanhos em escala geométrica (exigência do edital)
 TAMANHOS_N = [1_000, 2_000, 5_000, 10_000, 20_000, 30_000]
 REPETICOES = 15
 SEED = 42
@@ -21,12 +22,15 @@ def gerar_entradas():
     for n in TAMANHOS_N:
         m = max(10, n // 5)
 
+        # 1. Melhor caso (Ingênua falha no 1º caractere em todas as posições)
         t_melhor = "B" * n
         p_melhor = "A" * m
 
+        # 2. Caso médio (texto e padrão aleatórios com semente fixa)
         t_medio = "".join(rng.choices(alfabeto, k=n))
         p_medio = "".join(rng.choices(alfabeto, k=m))
 
+        # 3. Pior caso (prefixos repetidos falhando apenas no último caractere)
         t_pior = "A" * n
         p_pior = "A" * (m - 1) + "B"
 
@@ -77,6 +81,7 @@ def rodar_testes_e_benchmark():
                     respostas_corretude.add(ocorr)
                     tempos.append(tempo)
 
+                # Teste automatizado de corretude entre as 4 implementações
                 assert len(respostas_corretude) == 1, (
                     f"Erro de corretude em {cenario}, n={n}: {respostas_corretude}"
                 )
@@ -160,7 +165,7 @@ def gerar_graficos(resultados):
         if r["cenario"] == "pior" and r["linguagem"] == "Python" and r["algoritmo"] == "kmp"
     ]
     ns = [d["n"] for d in dados_kmp_py]
-    razoes = [d["media_s"] / (d["n"] + d["m"]) * 1e6 for d in dados_kmp_py]
+    razoes = [d["media_s"] / (d["n"] + d["m"]) * 1e6 for d in dados_kmp_py]  # microssegundos/op
 
     plt.figure(figsize=(9, 5))
     plt.plot(ns, razoes, marker="s", color="darkgreen", label="T(n) / (n + m) [µs/op]")
