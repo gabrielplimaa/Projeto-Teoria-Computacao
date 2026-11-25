@@ -40,6 +40,8 @@ Dado um texto $T$ de comprimento $n$ e um padrão $P$ de comprimento $m$ ($m \le
 │   ├── grafico_pior_caso_loglog.png
 │   ├── grafico_cenarios_c.png
 │   └── grafico_razao_teorico_medido.png
+├── testes/
+│   └── test_corretude.py        # Testes automatizados de corretude das 4 implementações
 ├── executar_experimentos.py     # Gera as entradas, roda os benchmarks, valida a corretude e plota os gráficos
 └── README.md
 ```
@@ -71,7 +73,16 @@ python python/busca_padroes.py kmp entradas/T_pior_10000.txt entradas/P_pior_100
 
 A leitura dos arquivos fica fora da medição de tempo; apenas a execução do algoritmo é cronometrada.
 
-### 3. Executando todos os experimentos
+### 3. Rodando os testes de corretude
+Com o binário em C compilado, rode a partir da raiz do repositório:
+
+```bash
+python -m unittest testes/test_corretude.py -v
+```
+
+Os testes executam as quatro implementações (C/Python × Ingênua/KMP) sobre as mesmas entradas e verificam que todas retornam o mesmo número de ocorrências, igual ao valor esperado. São cobertos casos com ocorrências sobrepostas, padrão no início e no fim do texto, padrão maior que o texto, padrão de um caractere, recuos da tabela LPS do KMP e 30 entradas aleatórias com semente fixa.
+
+### 4. Executando todos os experimentos
 Com o binário em C compilado, rode a partir da raiz do repositório:
 
 ```bash
