@@ -39,7 +39,8 @@ Dado um texto $T$ de comprimento $n$ e um padrão $P$ de comprimento $m$ ($m \le
 │   ├── benchmark.csv            # Tempos médios e desvios-padrão de todas as execuções
 │   ├── grafico_pior_caso_loglog.png
 │   ├── grafico_cenarios_c.png
-│   └── grafico_razao_teorico_medido.png
+│   ├── grafico_razao_teorico_medido.png
+│   └── grafico_python_vs_c.png
 ├── testes/
 │   └── test_corretude.py        # Testes automatizados de corretude das 4 implementações
 ├── executar_experimentos.py     # Gera as entradas, roda os benchmarks, valida a corretude e plota os gráficos
@@ -95,6 +96,19 @@ O script:
 3. Verifica automaticamente que as quatro implementações retornam o mesmo número de ocorrências;
 4. Salva os dados em `resultados/benchmark.csv` e gera os gráficos em `resultados/`.
 
+Para regenerar apenas os gráficos a partir de um `benchmark.csv` já existente (sem rodar as medições de novo):
+
+```bash
+python executar_experimentos.py --graficos
+```
+
+| Gráfico | Comparação |
+| :--- | :--- |
+| `grafico_pior_caso_loglog.png` | Algoritmo × algoritmo e linguagem × linguagem no pior caso (log-log, com desvio-padrão) |
+| `grafico_cenarios_c.png` | Melhor, médio e pior caso dos dois algoritmos em C |
+| `grafico_razao_teorico_medido.png` | Teórico × medido: razão $T(n)/f(n)$ para os 2 algoritmos nas 2 linguagens |
+| `grafico_python_vs_c.png` | Linguagem × linguagem: quantas vezes Python é mais lento que C |
+
 ---
 
 ## 📈 Resultados Experimentais
@@ -111,7 +125,9 @@ Tempos médios de 15 execuções no **pior caso** ($T = \text{"A"}^n$, $P = \tex
 | $32.000$ | `0.034851` | `0.000057` | `4.587982` | `0.003200` |
 
 * Na Busca Ingênua, tanto em C quanto em Python, dobrar $n$ (e, consequentemente, $m$) multiplica o tempo por aproximadamente $4$, o comportamento quadrático esperado de $O(n \cdot m)$ com $m \propto n$.
-* No KMP, dobrar $n$ multiplica o tempo por aproximadamente $2$, o crescimento linear esperado de $\Theta(n + m)$; em Python, a razão $T(n)/(n+m)$ se mantém aproximadamente constante (ver `grafico_razao_teorico_medido.png`).
+* No KMP, dobrar $n$ multiplica o tempo por aproximadamente $2$, o crescimento linear esperado de $\Theta(n + m)$.
+* **Teórico × medido** (`grafico_razao_teorico_medido.png`): no pior caso, a razão $T(n)/[(n-m+1)\cdot m]$ da Busca Ingênua fica praticamente constante (≈ 0,21–0,24 ns por comparação em C e ≈ 24–29 ns em Python), assim como a razão $T(n)/(n+m)$ do KMP (≈ 1,4–1,9 ns em C e ≈ 83–95 ns em Python), confirmando as complexidades teóricas. As pequenas oscilações nos menores $n$ vêm de custos fixos que pesam mais em execuções curtas.
+* **Python × C** (`grafico_python_vs_c.png`): Python é de ~13× a ~75× mais lento que C no KMP e de ~22× a ~190× mais lento na Busca Ingênua. A diferença de linguagem altera apenas a constante multiplicativa; a ordem de crescimento é a mesma nas duas.
 * Nos cenários de melhor caso e caso médio, os dois algoritmos ficam na mesma ordem de grandeza, já que as falhas ocorrem logo nos primeiros caracteres.
 * Os tempos em C são medidos com um relógio de alta precisão (`QueryPerformanceCounter` no Windows, `clock_gettime` no Linux/macOS).
 
