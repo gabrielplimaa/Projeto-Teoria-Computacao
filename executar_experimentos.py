@@ -5,8 +5,8 @@ import statistics
 import subprocess
 import matplotlib.pyplot as plt
 
-# 6 tamanhos em escala geométrica (exigência do edital)
-TAMANHOS_N = [1_000, 2_000, 5_000, 10_000, 20_000, 30_000]
+# 6 tamanhos em escala geométrica de razão 2 (exigência do edital)
+TAMANHOS_N = [1_000, 2_000, 4_000, 8_000, 16_000, 32_000]
 REPETICOES = 15
 SEED = 42
 
