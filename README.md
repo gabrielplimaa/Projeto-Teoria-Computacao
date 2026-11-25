@@ -40,7 +40,9 @@ Dado um texto $T$ de comprimento $n$ e um padrão $P$ de comprimento $m$ ($m \le
 │   ├── grafico_pior_caso_loglog.png
 │   ├── grafico_cenarios_c.png
 │   ├── grafico_razao_teorico_medido.png
-│   └── grafico_python_vs_c.png
+│   ├── grafico_python_vs_c.png
+│   └── memoria.csv              # Pico de memória auxiliar (item opcional)
+├── medir_memoria.py             # Mede a memória auxiliar das implementações em Python (tracemalloc)
 ├── testes/
 │   └── test_corretude.py        # Testes automatizados de corretude das 4 implementações
 ├── executar_experimentos.py     # Gera as entradas, roda os benchmarks, valida a corretude e plota os gráficos
@@ -81,7 +83,7 @@ Com o binário em C compilado, rode a partir da raiz do repositório:
 python -m unittest testes/test_corretude.py -v
 ```
 
-Os testes executam as quatro implementações (C/Python × Ingênua/KMP) sobre as mesmas entradas e verificam que todas retornam o mesmo número de ocorrências, igual ao valor esperado. São cobertos casos com ocorrências sobrepostas, padrão no início e no fim do texto, padrão maior que o texto, padrão de um caractere, recuos da tabela LPS do KMP e 30 entradas aleatórias com semente fixa.
+Os testes executam as quatro implementações (C/Python × Ingênua/KMP) sobre as mesmas entradas e verificam que todas retornam o mesmo número de ocorrências, igual ao valor esperado. São cobertos casos com ocorrências sobrepostas, padrão no início e no fim do texto, padrão maior que o texto, padrão vazio, padrão de um caractere, recuos da tabela LPS do KMP e 30 entradas aleatórias com semente fixa.
 
 ### 4. Executando todos os experimentos
 Com o binário em C compilado, rode a partir da raiz do repositório:
@@ -108,6 +110,15 @@ python executar_experimentos.py --graficos
 | `grafico_cenarios_c.png` | Melhor, médio e pior caso dos dois algoritmos em C |
 | `grafico_razao_teorico_medido.png` | Teórico × medido: razão $T(n)/f(n)$ para os 2 algoritmos nas 2 linguagens |
 | `grafico_python_vs_c.png` | Linguagem × linguagem: quantas vezes Python é mais lento que C |
+
+### 5. Medindo o uso de memória (item opcional)
+Depois de gerar as entradas (passo 4), rode:
+
+```bash
+python medir_memoria.py
+```
+
+O script mede com `tracemalloc` o pico de memória auxiliar das implementações em Python no pior caso e salva em `resultados/memoria.csv`. A Busca Ingênua fica constante (O(1)) e o KMP cresce 40 B por elemento do padrão (Θ(m), vetor LPS).
 
 ---
 
