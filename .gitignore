@@ -1,0 +1,7 @@
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Binários compilados (gerados com gcc -O2 c/busca_padroes.c -o c/busca_padroes)
+c/busca_padroes
+c/busca_padroes.exe

@@ -85,6 +85,10 @@ class TestCorretude(unittest.TestCase):
     def test_padrao_maior_que_texto(self):
         self.verificar("ABC", "ABCD", 0)
 
+    def test_padrao_vazio(self):
+        # Convenção adotada nas 4 implementações: padrão vazio não tem ocorrências
+        self.verificar("ABC", "", 0)
+
     def test_padrao_de_um_caractere(self):
         self.verificar("BANANA", "A", 3)
 

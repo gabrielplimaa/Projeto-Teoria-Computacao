@@ -30,6 +30,10 @@ int busca_ingenua(char *texto, char *padrao){
     int tam_padrao = strlen(padrao);
     int ocorrencias = 0;
 
+    if (tam_padrao == 0 || tam_texto < tam_padrao){
+        return 0;
+    }
+
     for(int pos_texto=0; pos_texto<=tam_texto-tam_padrao; pos_texto++){
         int pos_padrao;
         for(pos_padrao=0; pos_padrao<tam_padrao; pos_padrao++){
