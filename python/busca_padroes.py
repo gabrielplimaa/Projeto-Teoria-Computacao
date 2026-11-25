@@ -75,4 +75,4 @@ if __name__ == "__main__":
         sys.exit(1)
     tempo = time.perf_counter() - inicio
 
-    print(f"{ocorrencias};{tempo:.6f}")
+    print(f"{ocorrencias};{tempo:.9f}")

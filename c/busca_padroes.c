@@ -1,7 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <time.h>
+#endif
+
+/* Relógio de alta resolução em segundos (clock() no Windows só tem ~1 ms de precisão) */
+double agora_segundos(void) {
+#ifdef _WIN32
+    static LARGE_INTEGER frequencia;
+    LARGE_INTEGER contador;
+    if (frequencia.QuadPart == 0) {
+        QueryPerformanceFrequency(&frequencia);
+    }
+    QueryPerformanceCounter(&contador);
+    return (double)contador.QuadPart / (double)frequencia.QuadPart;
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+#endif
+}
 
 int busca_ingenua(char *texto, char *padrao){
     int tam_texto = strlen(texto);
@@ -101,7 +123,7 @@ int main(int argc, char *argv[]) {
 
     int ocorrencias = 0;
 
-    clock_t inicio = clock();
+    double inicio = agora_segundos();
     if (strcmp(algoritmo, "ingenua") == 0) {
         ocorrencias = busca_ingenua(texto, padrao);
     } else if (strcmp(algoritmo, "kmp") == 0) {
@@ -112,9 +134,9 @@ int main(int argc, char *argv[]) {
         free(padrao);
         return 1;
     }
-    double tempo = (double)(clock() - inicio) / CLOCKS_PER_SEC;
+    double tempo = agora_segundos() - inicio;
 
-    printf("%d;%.6f\n", ocorrencias, tempo);
+    printf("%d;%.9f\n", ocorrencias, tempo);
 
     free(texto);
     free(padrao);
